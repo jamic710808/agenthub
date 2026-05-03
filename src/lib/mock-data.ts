@@ -61,8 +61,8 @@ export const RUN_HISTORY = Array.from({ length: 15 }).map((_, i) => ({
   status: i % 10 === 0 ? 'error' : 'success',
   duration: (rand() * 5 + 0.5).toFixed(2) + 's',
   cost: '$' + (rand() * 0.05).toFixed(4),
-  input: '帮我用 React 写一个带加载态的按钮组件。',
-  output: '好的，这是为你生成的 React 按钮组件代码...',
+  input: '幫我用 React 寫一個帶載入態的按鈕元件。',
+  output: '好的，這是為你生成的 React 按鈕元件代碼...',
   trace: [
     { name: 'Input Parser', duration: '0.1s', type: 'tool' },
     { name: 'Retrieve Context', duration: '0.5s', type: 'retriever' },

@@ -38,15 +38,15 @@ const openai = createOpenAI({
 export const runtime = "edge";
 export const maxDuration = 60;
 
-const SYSTEM_PROMPT = `你是一位严谨的结构化输出 AI Agent。对用户的 prompt，你必须以 JSON 结构作答，严格遵守传入的 schema：
+const SYSTEM_PROMPT = `你是一位嚴謹的結構化輸出 AI Agent。對用戶的 prompt，你必須以 JSON 結構作答，嚴格遵守傳入的 schema：
 
-1. 输出顺序：先产 thinking（含 summary 与 steps），再产 toolCalls（如有），最后产 finalAnswer——这是流式字段级渐进渲染的前提
-2. 若本次不需要调用任何工具，请**省略** toolCalls 字段（不要给空数组 []）
-3. 所有枚举字段必须精确匹配：
+1. 輸出順序：先產 thinking（含 summary 與 steps），再產 toolCalls（如有），最後產 finalAnswer——這是流式字段級漸進渲染的前提
+2. 若本次不需要調用任何工具，請**省略** toolCalls 字段（不要給空陣列 []）
+3. 所有枚舉字段必須精確匹配：
    - thinking.steps[].kind ∈ {analyze, plan, verify, decide}
    - toolCalls[].status ∈ {ok, error, timeout}
-4. finalAnswer 是 markdown 字符串，禁止使用 $...$ 或 $$...$$ 包裹的数学公式（前端不渲染 KaTeX）
-5. 不要返回 schema 之外的字段，不要返回纯文本或附加解释`;
+4. finalAnswer 是 markdown 字符串，禁止使用 $...$ 或 $$...$$ 包裹的數學公式（前端不渲染 KaTeX）
+5. 不要返回 schema 之外的字段，不要返回純文本或附加解釋`;
 
 function errorResponse(err: unknown, fallbackStatus = 500): Response {
   const classified = classifyError(err);
@@ -97,7 +97,7 @@ export async function POST(req: Request) {
     return Response.json(
       playgroundErrorSchema.parse({
         category: "unknown",
-        message: `模型 ${modelEntry.displayName} 暂未启用，请在选择器中换一个`,
+        message: `模型 ${modelEntry.displayName} 尚未啟用，請在選擇器中換一個`,
         retryable: false,
       }),
       { status: 400 },

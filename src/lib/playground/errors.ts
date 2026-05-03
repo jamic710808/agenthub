@@ -17,31 +17,31 @@ import type {
 
 const MESSAGES: Record<PlaygroundErrorCategory, { message: string; retryable: boolean }> = {
   network: {
-    message: "网络连接中断，已渲染的内容已保留，请检查网络后重试",
+    message: "網路連線中斷，已渲染的內容已保留，請檢查網路後重試",
     retryable: true,
   },
   auth: {
-    message: "API Key 鉴权失败，请到 Settings 检查你的 Key",
+    message: "API Key 鑑權失敗，請到 Settings 檢查你的 Key",
     retryable: false,
   },
   rate_limit: {
-    message: "请求过于频繁，请稍后再试",
+    message: "請求過於頻繁，請稍後再試",
     retryable: true,
   },
   context_too_long: {
-    message: "输入超过所选模型的上下文长度，请缩短输入或换个上下文更大的模型",
+    message: "輸入超過所選模型的上下文長度，請縮短輸入或換個上下文更大的模型",
     retryable: false,
   },
   upstream_timeout: {
-    message: "上游响应超时（60 秒上限），请重试或换个模型",
+    message: "上游回應逾時（60 秒上限），請重試或換個模型",
     retryable: true,
   },
   schema_parse_error: {
-    message: "模型返回的结构化数据解析失败，请重试或换个模型",
+    message: "模型回傳的結構化資料解析失敗，請重試或換個模型",
     retryable: true,
   },
   unknown: {
-    message: "出了点意外，展开「查看详情」看看原始错误",
+    message: "出了點意外，展開「查看詳情」看看原始錯誤",
     retryable: true,
   },
 };

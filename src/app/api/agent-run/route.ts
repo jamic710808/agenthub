@@ -47,11 +47,11 @@ export async function POST(req: Request) {
     model: openai(DEFAULT_MODEL),
     schema: agentOutputSchema,
     system:
-      "你是一位写作助手。用户会给你一个 prompt，你必须严格遵守传入的 schema 产出结构化响应：" +
-      "title 是简洁主标题，sections 是 1-8 段分段正文（合理混用 heading/paragraph/bullet），" +
-      "summary 是一句话摘要。" +
-      "不要返回纯文本，不要附加解释说明，所有内容必须塞进 schema 的对应字段，一个字段都不能漏。" +
-      (model ? `\n\n（前端声明的 UI 模型标签：${model}，仅供参考，实际由后端模型生成。）` : ""),
+      "你是一位寫作助手。用戶會給你一個 prompt，你必須嚴格遵守傳入的 schema 產出結構化響應：" +
+      "title 是簡潔主標題，sections 是 1-8 段分段正文（合理混用 heading/paragraph/bullet），" +
+      "summary 是一句話摘要。" +
+      "不要返回純文本，不要附加解釋說明，所有內容必須塞進 schema 的對應字段，一個字段都不能漏。" +
+      (model ? `\n\n（前端聲明的 UI 模型標籤：${model}，僅供參考，實際由後端模型生成。）` : ""),
     prompt: userPrompt,
     onError: ({ error }) => {
       console.error("[api/agent-run] streamObject error:", error);

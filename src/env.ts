@@ -3,19 +3,19 @@ import { z } from "zod";
 const serverSchema = z.object({
   OPENAI_API_KEY: z
     .string()
-    .startsWith("sk-", "OPENAI_API_KEY 必须以 sk- 开头")
-    .describe("OpenAI API Key，用于调用 GPT 模型；从 platform.openai.com/api-keys 获取"),
+    .startsWith("sk-", "OPENAI_API_KEY 必須以 sk- 開頭")
+    .describe("OpenAI API Key，用於調用 GPT 模型；從 platform.openai.com/api-keys 獲取"),
   ANTHROPIC_API_KEY: z
     .string()
-    .startsWith("sk-ant-", "ANTHROPIC_API_KEY 必须以 sk-ant- 开头")
-    .describe("Anthropic API Key，用于调用 Claude 模型；从 console.anthropic.com/settings/keys 获取"),
+    .startsWith("sk-ant-", "ANTHROPIC_API_KEY 必須以 sk-ant- 開頭")
+    .describe("Anthropic API Key，用於調用 Claude 模型；從 console.anthropic.com/settings/keys 獲取"),
 });
 
 const clientSchema = z.object({
   NEXT_PUBLIC_APP_URL: z
     .string()
-    .url("NEXT_PUBLIC_APP_URL 必须是合法 URL")
-    .describe("应用对外 URL，用于 OAuth 回调 / 分享链接；本地填 http://localhost:3000"),
+    .url("NEXT_PUBLIC_APP_URL 必須是合法 URL")
+    .describe("應用對外 URL，用於 OAuth 回調 / 分享連結；本地填 http://localhost:3000"),
 });
 
 const sharedSchema = z.object({});
@@ -36,9 +36,9 @@ if (!parsed.success) {
     ([k, msgs]) => `  - ${k}: ${(msgs ?? []).join("; ")}`,
   );
   throw new Error(
-    "❌ 环境变量校验失败：\n" +
+    "❌ 環境變數校驗失敗：\n" +
       lines.join("\n") +
-      "\n\n请对照 .env.example 检查 .env.local，确保所有必填变量都填了且格式正确。",
+      "\n\n請對照 .env.example 檢查 .env.local，確保所有必填變數都填了且格式正確。",
   );
 }
 
