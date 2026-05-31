@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import {
@@ -22,18 +22,24 @@ import { Badge } from "@/components/ui/badge";
 import { AGENTS } from "@/lib/mock-data";
 import {
   agentOutputSchema,
+  type AgentOutput,
   type AgentOutputSection,
 } from "@/lib/schemas/agent-output";
 import { useMyAgents } from "@/lib/hooks/use-my-agents";
+import { useRunHistory } from "@/lib/hooks/use-run-history";
+import { createRunRecord } from "@/lib/schemas/run-record";
+import { useModelRegistry } from "@/lib/hooks/use-model-registry";
 
-const MODEL_OPTIONS = [
-  { id: "openai/gpt-5.4-mini", label: "GPT-5.4 Mini" },
-  { id: "openai/gpt-5.4", label: "GPT-5.4" },
-  { id: "anthropic/claude-haiku-4.5", label: "Claude Haiku 4.5" },
-  { id: "anthropic/claude-sonnet-4.6", label: "Claude Sonnet 4.6" },
-  { id: "google/gemini-2.5-flash", label: "Gemini 2.5 Flash" },
-  { id: "deepseek/deepseek-v3.2", label: "DeepSeek V3.2" },
-] as const;
+// 把結構化輸出攤平成可讀純文字，供 /runs 的輸出欄與記錄存檔使用
+function buildOutputText(o: AgentOutput): string {
+  const parts: string[] = [];
+  if (o.title) parts.push(o.title);
+  if (o.summary) parts.push(o.summary);
+  for (const s of o.sections ?? []) {
+    if (s?.content) parts.push(s.type === "bullet" ? `• ${s.content}` : s.content);
+  }
+  return parts.join("\n\n");
+}
 
 function SkeletonLine({ className = "" }: { className?: string }) {
   return (
@@ -95,13 +101,57 @@ export default function AgentDetail() {
   const agent = AGENTS.find((a) => a.id === id) || AGENTS[0];
 
   const [prompt, setPrompt] = useState("");
-  const [modelId, setModelId] = useState<string>(MODEL_OPTIONS[0].id);
+  const { enabledModels, isHydrated: modelsHydrated } = useModelRegistry();
+  const [modelEntryId, setModelEntryId] = useState<string>("");
+
+  // hydration 後預設選第一個啟用模型
+  useEffect(() => {
+    if (modelsHydrated && !modelEntryId && enabledModels.length > 0) {
+      setModelEntryId(enabledModels[0].id);
+    }
+  }, [modelsHydrated, modelEntryId, enabledModels]);
+
+  const selectedModel = enabledModels.find((m) => m.id === modelEntryId) ?? enabledModels[0];
+
+  const { addRun } = useRunHistory();
+
+  // 送出當下凍結本次 run 的上下文，避免 onFinish/onError 回呼讀到變動後的 state（stale closure）
+  const startRef = useRef(0);
+  const recordedRef = useRef(false);
+  const runCtxRef = useRef({ agentId: "", agentName: "", model: "", prompt: "" });
+
+  // 一次 run 只記一筆：onError 與 onFinish 可能先後觸發，用 recordedRef 防重複
+  const recordRun = (status: "success" | "error", output: string) => {
+    if (recordedRef.current) return;
+    recordedRef.current = true;
+    const c = runCtxRef.current;
+    const durationMs = startRef.current ? Date.now() - startRef.current : 0;
+    addRun(
+      createRunRecord({
+        agentId: c.agentId,
+        agentName: c.agentName,
+        model: c.model,
+        prompt: c.prompt,
+        status,
+        durationMs,
+        output,
+      }),
+    );
+  };
 
   const { object, submit, isLoading, error, stop } = useObject({
     api: "/api/agent-run",
     schema: agentOutputSchema,
     onError: (err) => {
       console.error("[playground] useObject error:", err);
+      recordRun("error", err.message || "生成失敗");
+    },
+    onFinish: ({ object: finalObject, error: finishErr }) => {
+      if (finalObject && !finishErr) {
+        recordRun("success", buildOutputText(finalObject));
+      } else {
+        recordRun("error", finishErr?.message || "輸出格式校驗失敗");
+      }
     },
   });
 
@@ -109,8 +159,21 @@ export default function AgentDetail() {
 
   const handleSend = () => {
     const text = prompt.trim();
-    if (!text || isLoading) return;
-    submit({ prompt: text, model: modelId });
+    if (!text || isLoading || !selectedModel) return;
+    recordedRef.current = false;
+    startRef.current = Date.now();
+    runCtxRef.current = {
+      agentId: agent.id,
+      agentName: agent.name,
+      model: selectedModel.modelId,
+      prompt: text,
+    };
+    submit({
+      prompt: text,
+      model: selectedModel.modelId,
+      baseURL: selectedModel.baseURL,
+      apiKey: selectedModel.apiKey,
+    });
   };
 
   const handleCopyJson = () => {
@@ -199,16 +262,20 @@ export default function AgentDetail() {
                 <div className="flex items-center gap-[8px]">
                   <span className="text-[12px] font-medium text-fg-secondary">模型</span>
                   <select
-                    value={modelId}
-                    onChange={(e) => setModelId(e.target.value)}
-                    disabled={isLoading}
+                    value={selectedModel?.id ?? ""}
+                    onChange={(e) => setModelEntryId(e.target.value)}
+                    disabled={isLoading || enabledModels.length === 0}
                     className="h-[28px] rounded-[8px] border border-border-default bg-bg-base px-[8px] text-[12px] text-fg-default focus:outline-none focus:ring-2 focus:ring-primary-default/40 focus:ring-offset-2 disabled:opacity-60"
                   >
-                    {MODEL_OPTIONS.map((m) => (
-                      <option key={m.id} value={m.id}>
-                        {m.label}
-                      </option>
-                    ))}
+                    {enabledModels.length === 0 ? (
+                      <option value="">（無啟用模型，請到設定→模型新增）</option>
+                    ) : (
+                      enabledModels.map((m) => (
+                        <option key={m.id} value={m.id}>
+                          {m.displayName}
+                        </option>
+                      ))
+                    )}
                   </select>
                 </div>
               </div>

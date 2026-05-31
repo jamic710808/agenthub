@@ -16,7 +16,7 @@ export default function Landing() {
           <Badge variant="outline" className="mb-[16px]">AgentHub 2.0 現已發布</Badge>
           {/* [Prep-02] 修复 #1: 标题 30/36px 符合规范 */}
           <h1 className="mb-[16px] max-w-[800px] text-[30px] font-bold leading-tight tracking-tight text-fg-default md:text-[36px]">
-            下一代 <span className="text-primary-default">AI Agent</span><br />
+            下一代 <span className="text-gradient-brand">AI Agent</span><br />
             構建、編排與分發平台
           </h1>
           <p className="mb-[24px] max-w-[600px] text-[15px] text-fg-secondary md:text-[16px]">
@@ -126,19 +126,19 @@ export default function Landing() {
       <section className="border-y border-border-default bg-bg-elevated px-[24px] py-[32px]">
         <div className="mx-auto grid max-w-[1024px] grid-cols-2 gap-[24px] md:grid-cols-4">
           <div className="flex flex-col items-center gap-[4px] text-center">
-            <span className="text-[30px] font-bold text-fg-default">500+</span>
+            <span className="text-[30px] font-bold text-gradient-brand">500+</span>
             <span className="text-[13px] text-fg-secondary">個 Agent</span>
           </div>
           <div className="flex flex-col items-center gap-[4px] text-center">
-            <span className="text-[30px] font-bold text-fg-default">1 萬+</span>
+            <span className="text-[30px] font-bold text-gradient-brand">1 萬+</span>
             <span className="text-[13px] text-fg-secondary">開發者</span>
           </div>
           <div className="flex flex-col items-center gap-[4px] text-center">
-            <span className="text-[30px] font-bold text-fg-default">5000 萬+</span>
+            <span className="text-[30px] font-bold text-gradient-brand">5000 萬+</span>
             <span className="text-[13px] text-fg-secondary">次運行</span>
           </div>
           <div className="flex flex-col items-center gap-[4px] text-center">
-            <span className="text-[30px] font-bold text-fg-default">99.9%</span>
+            <span className="text-[30px] font-bold text-gradient-brand">99.9%</span>
             <span className="text-[13px] text-fg-secondary">可用性</span>
           </div>
         </div>

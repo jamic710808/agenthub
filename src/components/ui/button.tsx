@@ -9,13 +9,13 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
 }
 
 const BASE_CLASS =
-  'inline-flex items-center justify-center whitespace-nowrap rounded-[8px] text-[14px] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-default/40 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg-base)] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed';
+  'inline-flex items-center justify-center whitespace-nowrap rounded-[8px] text-[14px] font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-default/40 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg-base)] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed';
 
 export function buttonVariants(opts?: { variant?: ButtonProps['variant']; size?: ButtonProps['size'] }) {
   const variant = opts?.variant ?? 'primary';
   const size = opts?.size ?? 'md';
   return cn(BASE_CLASS, {
-    'bg-primary-default text-primary-fg not-disabled:hover:bg-primary-hover not-disabled:active:bg-primary-active':
+    'bg-gradient-brand text-primary-fg shadow-glow-brand not-disabled:hover:brightness-110 not-disabled:active:brightness-95':
       variant === 'primary' || variant === 'default',
     'bg-bg-elevated text-fg-default not-disabled:hover:bg-bg-muted not-disabled:active:bg-bg-subtle':
       variant === 'secondary',
@@ -40,9 +40,9 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         ref={ref}
         className={cn(
           // [Prep-02] 修复 #2: disabled 态用 opacity+cursor-not-allowed 但保留 pointer-events 让 cursor 生效
-          'inline-flex items-center justify-center whitespace-nowrap rounded-[8px] text-[14px] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-default/40 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg-base)] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed',
+          'inline-flex items-center justify-center whitespace-nowrap rounded-[8px] text-[14px] font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-default/40 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg-base)] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed',
           {
-            'bg-primary-default text-primary-fg not-disabled:hover:bg-primary-hover not-disabled:active:bg-primary-active': variant === 'primary',
+            'bg-gradient-brand text-primary-fg shadow-glow-brand not-disabled:hover:brightness-110 not-disabled:active:brightness-95': variant === 'primary',
             'bg-bg-elevated text-fg-default not-disabled:hover:bg-bg-muted not-disabled:active:bg-bg-subtle': variant === 'secondary',
             'border border-border-default bg-transparent text-fg-default not-disabled:hover:bg-bg-elevated not-disabled:active:bg-bg-subtle': variant === 'outline',
             'bg-transparent text-fg-secondary not-disabled:hover:bg-bg-subtle not-disabled:hover:text-fg-default not-disabled:active:bg-bg-muted': variant === 'ghost',

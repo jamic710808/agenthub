@@ -9,6 +9,12 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Badge } from '@/components/ui/badge';
 import { AGENTS, CATEGORIES, PROVIDERS } from '@/lib/mock-data';
 
+// 從實際 Agent 資料推導能力選項，避免硬編清單跟資料對不上（原本寫死的清單與 mock 不符）
+const ALL_CAPABILITIES = [...new Set(AGENTS.flatMap((a) => a.capabilities))];
+
+// 每頁卡片數（3 欄 × 3 列）
+const PAGE_SIZE = 9;
+
 // [Prep-02] 修复 #3: 骨架屏卡片组件
 function SkeletonCard() {
   return (
@@ -49,6 +55,9 @@ function TelescopeIllustration() {
 export default function Gallery() {
   const [searchTerm, setSearchTerm] = useState('');
   const [activeCategory, setActiveCategory] = useState<string>('');
+  const [selectedProviders, setSelectedProviders] = useState<string[]>([]);
+  const [selectedCaps, setSelectedCaps] = useState<string[]>([]);
+  const [page, setPage] = useState(1);
   // [Prep-02] 修复 #3: 模拟加载态
   const [isLoading, setIsLoading] = useState(true);
 
@@ -57,11 +66,42 @@ export default function Gallery() {
     return () => clearTimeout(timer);
   }, []);
 
+  // 任一篩選條件變動都回到第 1 頁，避免停在不存在的頁
+  useEffect(() => {
+    setPage(1);
+  }, [searchTerm, activeCategory, selectedProviders, selectedCaps]);
+
+  const toggleProvider = (p: string) =>
+    setSelectedProviders((prev) =>
+      prev.includes(p) ? prev.filter((x) => x !== p) : [...prev, p],
+    );
+  const toggleCap = (c: string) =>
+    setSelectedCaps((prev) =>
+      prev.includes(c) ? prev.filter((x) => x !== c) : [...prev, c],
+    );
+  const clearFilters = () => {
+    setSearchTerm('');
+    setActiveCategory('');
+    setSelectedProviders([]);
+    setSelectedCaps([]);
+  };
+
+  // 多條件疊加：類型/搜尋/提供商/能力之間是 AND，多選之內是 OR
   const filteredAgents = AGENTS.filter(a => {
     if (activeCategory && a.category !== activeCategory) return false;
     if (searchTerm && !a.name.includes(searchTerm) && !a.description.includes(searchTerm)) return false;
+    if (selectedProviders.length && !selectedProviders.includes(a.provider)) return false;
+    if (selectedCaps.length && !selectedCaps.some((c) => a.capabilities.includes(c))) return false;
     return true;
   });
+
+  // 真分頁：依篩選結果切片，並把 page 夾在合法範圍內
+  const totalPages = Math.max(1, Math.ceil(filteredAgents.length / PAGE_SIZE));
+  const currentPage = Math.min(page, totalPages);
+  const pagedAgents = filteredAgents.slice(
+    (currentPage - 1) * PAGE_SIZE,
+    currentPage * PAGE_SIZE,
+  );
 
   return (
     <div className="flex flex-1 flex-col">
@@ -115,7 +155,12 @@ export default function Gallery() {
               <div className="flex flex-col gap-[8px]">
                 {PROVIDERS.map(provider => (
                   <label key={provider} className="flex items-center gap-[8px] cursor-pointer">
-                    <input type="checkbox" className="h-[14px] w-[14px] rounded-[4px] border-border-strong bg-bg-base text-primary-default accent-primary-default" />
+                    <input
+                      type="checkbox"
+                      checked={selectedProviders.includes(provider)}
+                      onChange={() => toggleProvider(provider)}
+                      className="h-[14px] w-[14px] rounded-[4px] border-border-strong bg-bg-base text-primary-default accent-primary-default"
+                    />
                     <span className="text-[13px] text-fg-default">{provider}</span>
                   </label>
                 ))}
@@ -125,11 +170,22 @@ export default function Gallery() {
             <div className="flex flex-col gap-[12px]">
               <h3 className="text-[13px] font-medium text-fg-secondary">能力</h3>
               <div className="flex flex-wrap gap-[8px]">
-                {['程式碼生成', '數據分析', '視覺分析', '文字摘要', '知識庫'].map(cap => (
-                  <Badge key={cap} variant="secondary" className="px-[8px] py-0 text-[12px]">
-                    {cap}
-                  </Badge>
-                ))}
+                {ALL_CAPABILITIES.map(cap => {
+                  const active = selectedCaps.includes(cap);
+                  return (
+                    <button
+                      key={cap}
+                      onClick={() => toggleCap(cap)}
+                      className={`rounded-full px-[8px] py-[2px] text-[12px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-default/40 ${
+                        active
+                          ? 'bg-primary-default/10 text-primary-default font-medium'
+                          : 'bg-bg-elevated text-fg-secondary hover:text-fg-default'
+                      }`}
+                    >
+                      {cap}
+                    </button>
+                  );
+                })}
               </div>
             </div>
           </div>
@@ -153,12 +209,12 @@ export default function Gallery() {
             <div className="flex h-[300px] flex-col items-center justify-center rounded-[8px] border border-dashed border-border-strong bg-bg-base text-center">
               <TelescopeIllustration />
               <p className="mt-[16px] mb-[16px] text-[15px] font-medium text-fg-secondary">沒找到匹配的 Agent</p>
-              <Button variant="outline" onClick={() => { setSearchTerm(''); setActiveCategory(''); }}>清除篩選</Button>
+              <Button variant="outline" onClick={clearFilters}>清除篩選</Button>
             </div>
           ) : (
             // [Prep-02] 修复 #4: md 2列，lg 3列
             <div className="grid grid-cols-1 gap-[16px] md:grid-cols-2 lg:grid-cols-3">
-              {filteredAgents.map(agent => (
+              {pagedAgents.map(agent => (
                 <Card key={agent.id} className="flex flex-col">
                   <CardHeader className="p-[16px] pb-[12px]">
                     <div className="flex items-start justify-between">
@@ -190,11 +246,27 @@ export default function Gallery() {
             </div>
           )}
 
-          {!isLoading && filteredAgents.length > 0 && (
+          {!isLoading && filteredAgents.length > 0 && totalPages > 1 && (
             <div className="mt-[32px] flex items-center justify-center gap-[12px]">
-              <Button variant="outline" size="icon" disabled><ChevronLeft className="h-[16px] w-[16px]" /></Button>
-              <span className="text-[13px] text-fg-secondary">第 1 頁，共 3 頁</span>
-              <Button variant="outline" size="icon"><ChevronRight className="h-[16px] w-[16px]" /></Button>
+              <Button
+                variant="outline"
+                size="icon"
+                disabled={currentPage <= 1}
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+              >
+                <ChevronLeft className="h-[16px] w-[16px]" />
+              </Button>
+              <span className="text-[13px] text-fg-secondary">
+                第 {currentPage} 頁，共 {totalPages} 頁
+              </span>
+              <Button
+                variant="outline"
+                size="icon"
+                disabled={currentPage >= totalPages}
+                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              >
+                <ChevronRight className="h-[16px] w-[16px]" />
+              </Button>
             </div>
           )}
         </main>

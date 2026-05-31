@@ -121,7 +121,7 @@ export default function Pricing() {
                   <td className="p-[16px] text-fg-default">大模型 API 訪問</td>
                   <td className="p-[16px] text-fg-secondary">僅基礎模型</td>
                   <td className="p-[16px] text-fg-secondary">所有可用模型</td>
-                  <td className="p-[16px] text-fg-secondary">所有可用模型 + 专属定制</td>
+                  <td className="p-[16px] text-fg-secondary">所有可用模型 + 專屬定制</td>
                 </tr>
                 <tr>
                   <td className="p-[16px] text-fg-default">Trace 留存時間</td>

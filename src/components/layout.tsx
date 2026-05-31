@@ -61,14 +61,14 @@ export function Header() {
         </nav>
       </div>
       <div className="flex items-center gap-[16px]">
+        {/* [Phase-1] Supabase 金鑰未配置，暫時隱藏「登入」「免費開始」入口，避免點了報錯誤導。
+            登入頁本身保留，待補真實金鑰後再恢復入口。 */}
         <Button variant="ghost" size="sm" asChild>
           <Link href="/settings">
             <Settings className="mr-[8px] h-[16px] w-[16px]" />
             設置
           </Link>
         </Button>
-        <Button variant="outline" size="sm">登入</Button>
-        <Button size="sm">免費開始</Button>
       </div>
     </header>
   );
@@ -95,7 +95,7 @@ export function Footer() {
         </div>
         <div className="flex flex-col gap-[12px]">
           <h4 className="text-[14px] font-medium text-fg-default">資源</h4>
-          <a href="#" className="text-[14px] text-fg-secondary transition-colors hover:text-primary-default">文檔</a>
+          <Link href="/docs" className="text-[14px] text-fg-secondary transition-colors hover:text-primary-default">文檔</Link>
           <a href="#" className="text-[14px] text-fg-secondary transition-colors hover:text-primary-default">API 參考</a>
           <a href="#" className="text-[14px] text-fg-secondary transition-colors hover:text-primary-default">部落格</a>
         </div>

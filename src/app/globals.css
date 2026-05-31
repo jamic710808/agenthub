@@ -19,22 +19,28 @@
 
 @theme {
   /* ── Color / Background ──────────────────────────── */
-  --color-bg-base:     hsl(220 15% 10%);
-  --color-bg-subtle:   hsl(220 15% 13%);
-  --color-bg-muted:    hsl(220 15% 17%);
-  --color-bg-elevated: hsl(220 15% 22%);
+  /* 靛紫 AI 主軸：背景軸從 220°藍 → 250°紫灰，再壓深一階更通透 */
+  --color-bg-base:     hsl(250 20% 8%);
+  --color-bg-subtle:   hsl(250 18% 11%);
+  --color-bg-muted:    hsl(250 16% 15%);
+  --color-bg-elevated: hsl(250 15% 20%);
 
   /* ── Color / Foreground ──────────────────────────── */
-  --color-fg-default:   hsl(220 10% 95%);
-  --color-fg-secondary: hsl(220 10% 70%);
-  --color-fg-muted:     hsl(220 10% 50%);
-  --color-fg-disabled:  hsl(220 10% 35%);
+  --color-fg-default:   hsl(250 15% 96%);
+  --color-fg-secondary: hsl(250 12% 72%);
+  --color-fg-muted:     hsl(250 12% 52%);
+  --color-fg-disabled:  hsl(250 12% 36%);
 
   /* ── Color / Primary ─────────────────────────────── */
-  --color-primary-default: hsl(220 100% 65%);
-  --color-primary-hover:   hsl(220 90% 65%);
-  --color-primary-active:  hsl(220 90% 55%);
+  /* 電光藍 → 靛紫，一眼 AI 產品感 */
+  --color-primary-default: hsl(258 90% 66%);
+  --color-primary-hover:   hsl(258 90% 72%);
+  --color-primary-active:  hsl(258 85% 58%);
   --color-primary-fg:      hsl(0 0% 100%);
+
+  /* ── Color / Accent 漸層端點（靛紫 → 洋紅） ─────────── */
+  --color-accent-from: hsl(258 90% 66%);
+  --color-accent-to:   hsl(286 85% 68%);
 
   /* ── Color / Status ──────────────────────────────── */
   --color-status-success: hsl(163 57% 50%);
@@ -42,9 +48,9 @@
   --color-status-error:   hsl(0 70% 60%);
 
   /* ── Color / Border ──────────────────────────────── */
-  --color-border-default: hsl(220 15% 22%);
-  --color-border-subtle:  hsl(220 15% 17%);
-  --color-border-strong:  hsl(220 15% 30%);
+  --color-border-default: hsl(250 15% 20%);
+  --color-border-subtle:  hsl(250 15% 15%);
+  --color-border-strong:  hsl(250 15% 28%);
 
   /* ── Typography / Font Family ────────────────────── */
   /* 通过 next/font/google 注入到 <html> 的 CSS 变量。
@@ -120,5 +126,54 @@
   nav a,
   nav a:hover {
     text-decoration: none;
+  }
+}
+
+/* ================================================================
+   Utilities — 靛紫質感工具類（方案 A）
+   ================================================================ */
+
+@layer utilities {
+  /* 漸層文字：用於 Hero 標題、統計數字 */
+  .text-gradient-brand {
+    background-image: linear-gradient(
+      135deg,
+      var(--color-accent-from),
+      var(--color-accent-to)
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  /* 漸層背景：用於主按鈕、重點區塊 */
+  .bg-gradient-brand {
+    background-image: linear-gradient(
+      135deg,
+      var(--color-accent-from),
+      var(--color-accent-to)
+    );
+  }
+
+  /* 靛紫光暈：取代純黑陰影，質感關鍵 */
+  .shadow-glow-brand {
+    box-shadow:
+      0 0 0 1px color-mix(in oklab, var(--color-primary-default) 18%, transparent),
+      0 10px 34px -10px color-mix(in oklab, var(--color-primary-default) 45%, transparent);
+  }
+
+  /* 卡片 hover：微浮起 + 主色光暈，過渡柔順 */
+  .card-lift {
+    transition:
+      transform 200ms ease,
+      box-shadow 200ms ease,
+      border-color 200ms ease;
+  }
+  .card-lift:hover {
+    transform: translateY(-2px);
+    border-color: color-mix(in oklab, var(--color-primary-default) 50%, var(--color-border-strong));
+    box-shadow:
+      0 0 0 1px color-mix(in oklab, var(--color-primary-default) 15%, transparent),
+      0 12px 32px -12px color-mix(in oklab, var(--color-primary-default) 40%, transparent);
   }
 }

@@ -19,7 +19,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { RUN_HISTORY } from "@/lib/mock-data";
+import { useRunHistory } from "@/lib/hooks/use-run-history";
 import { type Trace, type TraceStep } from "@/lib/schemas/trace";
 
 type RawTraceNode = { name: string; duration: string; type: string };
@@ -192,15 +192,18 @@ function ClockIllustration() {
 }
 
 export default function RunHistory() {
-  const [activeRunId, setActiveRunId] = useState(RUN_HISTORY[0]?.id || "");
-  const [isLoading, setIsLoading] = useState(true);
-  const hasData = RUN_HISTORY.length > 0;
-  const activeRun = RUN_HISTORY.find((r) => r.id === activeRunId) || RUN_HISTORY[0];
+  const { runs, isHydrated, clear } = useRunHistory();
+  const [activeRunId, setActiveRunId] = useState("");
+  const isLoading = !isHydrated;
+  const hasData = runs.length > 0;
+  const activeRun = runs.find((r) => r.id === activeRunId) || runs[0];
 
+  // hydration 後預設選中最新一筆（左側列表高亮 + 右側詳情）
   useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 400);
-    return () => clearTimeout(timer);
-  }, []);
+    if (isHydrated && !activeRunId && runs.length > 0) {
+      setActiveRunId(runs[0].id);
+    }
+  }, [isHydrated, activeRunId, runs]);
 
   const activeTrace = useMemo(
     () =>
@@ -216,13 +219,24 @@ export default function RunHistory() {
         <aside className="hidden w-[300px] flex-col border-r border-border-default bg-bg-subtle md:flex lg:w-[360px] shrink-0">
           <div className="flex h-[48px] items-center justify-between border-b border-border-default px-[16px] shrink-0">
             <h2 className="text-[14px] font-semibold text-fg-default">運行記錄</h2>
-            <Badge variant="outline" className="text-[12px]">
-              {RUN_HISTORY.length} 條
-            </Badge>
+            <div className="flex items-center gap-[8px]">
+              <Badge variant="outline" className="text-[12px]">
+                {runs.length} 條
+              </Badge>
+              {hasData && (
+                <button
+                  onClick={clear}
+                  className="text-[12px] text-fg-muted transition-colors hover:text-status-error focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-default/40 rounded-[4px] px-[4px]"
+                  title="清空所有運行記錄"
+                >
+                  清空
+                </button>
+              )}
+            </div>
           </div>
           {!isLoading && hasData ? (
             <div className="flex-1 overflow-y-auto p-[12px] space-y-[8px]">
-              {RUN_HISTORY.map((run) => (
+              {runs.map((run) => (
                 <button
                   key={run.id}
                   onClick={() => setActiveRunId(run.id)}

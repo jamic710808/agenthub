@@ -6,7 +6,6 @@ function seededRandom(seed: number) {
   };
 }
 const rand = seededRandom(42);
-const MOCK_NOW = 1713600000000;
 
 export const AGENTS = Array.from({ length: 24 }).map((_, i) => ({
   id: `agent-${i + 1}`,
@@ -53,20 +52,3 @@ export const CATEGORIES = [
 ];
 
 export const PROVIDERS = ['OpenAI', 'Anthropic', 'Meta', 'Google', 'Mistral'];
-
-export const RUN_HISTORY = Array.from({ length: 15 }).map((_, i) => ({
-  id: `run-00${i + 1}`,
-  timestamp: new Date(MOCK_NOW - i * 3600000 * rand()).toISOString(),
-  agent: AGENTS[i % 8].name,
-  status: i % 10 === 0 ? 'error' : 'success',
-  duration: (rand() * 5 + 0.5).toFixed(2) + 's',
-  cost: '$' + (rand() * 0.05).toFixed(4),
-  input: '幫我用 React 寫一個帶載入態的按鈕元件。',
-  output: '好的，這是為你生成的 React 按鈕元件代碼...',
-  trace: [
-    { name: 'Input Parser', duration: '0.1s', type: 'tool' },
-    { name: 'Retrieve Context', duration: '0.5s', type: 'retriever' },
-    { name: 'LLM Generation', duration: '2.3s', type: 'llm' },
-    { name: 'Output Formatter', duration: '0.1s', type: 'tool' },
-  ],
-}));
